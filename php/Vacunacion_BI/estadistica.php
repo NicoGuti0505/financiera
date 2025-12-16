@@ -5,7 +5,7 @@ if (!isset($_SESSION['tipo_usuario_id'])) {
     exit;
 }
 
-if (!isset($_SESSION['tipo_usuario_id']) || ($_SESSION['tipo_usuario_id'] != 10 && $_SESSION['tipo_usuario_id'] != 1)) {
+if (!isset($_SESSION['tipo_usuario_id']) || ($_SESSION['tipo_usuario_id'] != 7 && $_SESSION['tipo_usuario_id'] != 1)) {
     header('Location: ../menu.php');
     exit;
 }
@@ -94,12 +94,16 @@ if (!isset($_SESSION['tipo_usuario_id']) || ($_SESSION['tipo_usuario_id'] != 10 
 
 </head>
 <body class="bg-gray-100 p-5">
-    <div class="flex items-center justify-center mb-4">
-        <h1 class="text-2xl font-bold text-blue-600 mr-4">Estadística Vacunacion Fiebre Amarilla</h1>
-        <a href="../menu.php" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition">
-            Atrás
-        </a>
-
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold text-blue-600 mr-4">Estadistica Vacunacion Fiebre Amarilla</h1>
+        <div class="flex items-center space-x-2">
+            <a href="descargar_reporte.php" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition">
+                Descargar reporte
+            </a>
+            <a href="../menu.php" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition">
+                Atras
+            </a>
+        </div>
     </div>
 
     <div class="bg-white shadow-lg rounded-lg border border-blue-100">
@@ -212,3 +216,5 @@ if (!isset($_SESSION['tipo_usuario_id']) || ($_SESSION['tipo_usuario_id'] != 10 
 
 </body>
 </html>
+
+

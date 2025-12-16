@@ -8,8 +8,18 @@ use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
 header('Content-Type: application/json');
 
+set_exception_handler(function ($e) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    exit;
+});
+
+set_error_handler(function ($severity, $message, $file, $line) {
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+
 // Cambia manualmente este valor cuando necesites mover el corte
-$CORTE_OBJETIVO = 27;
+$CORTE_OBJETIVO = 26;
 $MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 $ALLOWED_EXT = ['xlsx', 'xls'];
 
@@ -115,7 +125,10 @@ function parseEntero($value)
 }
 
 // Cambiar a la base de datos correcta
-sqlsrv_query($conn, "USE Vacunacion;");
+$useDb = sqlsrv_query($conn, "USE Vacunacion;");
+if ($useDb === false) {
+    respond(['success' => false, 'message' => 'No se pudo seleccionar la base Vacunacion', 'sqlsrv' => sqlsrv_errors()], 500);
+}
 
 $candidatos = [];
 $rechazados = [];
