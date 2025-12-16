@@ -33,7 +33,6 @@ require_once __DIR__ . '/../../config.php'; // ajusta a ../config.php si aplica
   </a>
 </div>
 
-
   <!-- Filtros -->
   <form class="card card-body mb-3" method="get" id="formFiltros">
     <div class="row g-2">
@@ -41,18 +40,30 @@ require_once __DIR__ . '/../../config.php'; // ajusta a ../config.php si aplica
         <label class="form-label">Radicado</label>
         <input type="text" name="rad_via" class="form-control" value="<?= htmlspecialchars($_GET['rad_via'] ?? '') ?>">
       </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Identificación titular</label>
+        <input
+          type="text"
+          name="numero_identificacion_titular"
+          class="form-control"
+          value="<?= htmlspecialchars($_GET['numero_identificacion_titular'] ?? '') ?>">
+      </div>
+
       <div class="col-md-3">
         <label class="form-label">Región</label>
         <select name="region" id="region" class="form-select select2">
           <option value="">-- Todas --</option>
         </select>
       </div>
+
       <div class="col-md-3">
         <label class="form-label">Departamento</label>
         <select name="departamento" id="departamento" class="form-select select2">
           <option value="">-- Todos --</option>
         </select>
       </div>
+
       <div class="col-md-3">
         <label class="form-label">Municipio</label>
         <select name="municipio" id="municipio" class="form-select select2">
@@ -60,175 +71,287 @@ require_once __DIR__ . '/../../config.php'; // ajusta a ../config.php si aplica
         </select>
       </div>
     </div>
+
     <div class="mt-3 d-flex gap-2">
       <button class="btn btn-primary">Filtrar</button>
       <a class="btn btn-outline-secondary" href="index.php">Limpiar</a>
     </div>
   </form>
 
-  <?php
-  // ===================== Consulta SIN VISTA (CTE inline) =====================
-  $params = [];
-  $wheres = [];
-
-  if (!empty($_GET['rad_via'])) {
-      $wheres[] = "s.rad_via = ?";
-      $params[] = $_GET['rad_via'];
-  }
-  if (!empty($_GET['region'])) {
-      $wheres[] = "s.region = ?";
-      $params[] = $_GET['region'];
-  }
-  if (!empty($_GET['departamento'])) {
-      $wheres[] = "s.departamento = ?";
-      $params[] = $_GET['departamento'];
-  }
-  if (!empty($_GET['municipio'])) {
-      $wheres[] = "s.municipio = ?";
-      $params[] = $_GET['municipio'];
-  }
-
-  $sql = "
-  WITH ultimo_evento AS (
-      SELECT 
-          e.id_solicitudes,
-          e.radicado,
-          e.fecha_estado,
-          e.fecha_departamental,
-          ROW_NUMBER() OVER(
-              PARTITION BY e.radicado
-              ORDER BY e.fecha_estado DESC, e.id_solicitudes DESC
-          ) AS rn
-      FROM gestion_terceros.dbo.evento_solicitudes e
-  )
-  SELECT 
-      s.radicado,
-      s.rad_via,
-      s.numero_identificacion,
-      s.url_drive,
-      s.apr_departamental,
-      ue.fecha_departamental,
-      s.proceso,
-      ue.fecha_estado,
-      s.region,
-      s.departamento,
-      s.municipio
-  FROM gestion_terceros.dbo.solicitudes s
-  JOIN ultimo_evento ue 
-      ON s.radicado = ue.radicado
-  WHERE ue.rn = 1
-  " . ($wheres ? " AND " . implode(" AND ", $wheres) : "") . "
-  ORDER BY s.rad_via_num, s.rad_via;
-
-  ";
-
-  $stmt = sqlsrv_query($conn, $sql, $params);
-  if ($stmt === false) {
-      echo "<div class='alert alert-danger'>Error de consulta: ".htmlspecialchars(print_r(sqlsrv_errors(),true))."</div>";
-  } else {
-  ?>
-
-  <div class="card">
-    <div class="table-responsive">
-      <table class="table table-sm table-striped align-middle mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>radicado</th>
-            <th>Identificación</th>
-            <th>Región</th>
-            <th>Departamento</th>
-            <th>Municipio</th>
-            <th>Carpeta (url_drive)</th>
-            <th>calificacion departamental</th>
-            <th>fecha de calificacion</th>
-            <th>calificacion nacional</th>
-            <th>fecha de calificacion</th>
-            <th>Observaciones</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-        <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)): 
-            $radVia  = $row['rad_via'];
-            $url     = $row['url_drive'];
-            $fechaEs = $row['fecha_departamental'];
-            $fechaEsTxt = $fechaEs instanceof DateTime ? $fechaEs->format('Y-m-d ') : htmlspecialchars((string)$fechaEs);
-            $fechaEs2 = $row['fecha_estado'];
-            $fechaEsTxt2 = $fechaEs2 instanceof DateTime ? $fechaEs2->format('Y-m-d') : htmlspecialchars((string)$fechaEs2);
-        ?>
-          <tr>
-            <td><?= htmlspecialchars((string)$radVia) ?></td>
-            <td><?= htmlspecialchars((string)$row['numero_identificacion']) ?></td>
-            <td><?= htmlspecialchars((string)$row['region']) ?></td>
-            <td><?= htmlspecialchars((string)$row['departamento']) ?></td>
-            <td><?= htmlspecialchars((string)$row['municipio']) ?></td>
-                        <td>
-              <?php if (!empty($url)): ?>
-                <button 
-                  class="btn btn-sm btn-outline-primary ver-carpeta" 
-                  data-path="<?= htmlspecialchars((string)$url) ?>"
-                  data-rad="<?= htmlspecialchars((string)$radVia) ?>"
-                  type="button">
-                  Abrir
-                </button>
-              <?php else: ?>
-                <span class="text-muted">—</span>
-              <?php endif; ?>
-            </td>
-            <td><?= htmlspecialchars((string)$row['apr_departamental']) ?></td>
-            <td><?= $fechaEsTxt ?></td>
-            <td><?= htmlspecialchars((string)$row['proceso']) ?></td>
-            <td><?= $fechaEsTxt2 ?></td>
-            <td>
-              <button 
-                class="btn btn-sm btn-outline-dark ver-observaciones"
-                data-radicado="<?= htmlspecialchars((string)$row['radicado']) ?>"
-                type="button">
-                Ver
-              </button>
-            </td>
-<td>
 <?php
-  $rechDep   = strtoupper(trim((string)$row['apr_departamental'])) === 'RECHAZADO';
-  $rechPro   = strtoupper(trim((string)$row['proceso'])) === 'RECHAZADO';
-  $isSubDep  = strtoupper(trim((string)$row['apr_departamental'])) === 'SUBSANACION';
-  $isSubNac  = strtoupper(trim((string)$row['proceso'])) === 'SUBSANACION';
-  $esSub     = $isSubDep || $isSubNac;
+// ===================== Consulta + PAGINACIÓN (1000 por página) =====================
+$params = [];
+$wheres = [];
 
-  // Botón Objetar si está Rechazado
-  if ($rechDep || $rechPro): ?>
-    <button
-      type="button"
-      class="btn btn-sm btn-warning btn-objetar me-1"
-      data-radicado="<?= htmlspecialchars((string)$row['radicado']) ?>">
-      Objetar
-    </button>
-  <?php endif; ?>
+// --- filtros ---
+if (!empty($_GET['rad_via'])) {
+    $wheres[] = "s.rad_via = ?";
+    $params[] = $_GET['rad_via'];
+}
+if (!empty($_GET['region'])) {
+    $wheres[] = "s.region = ?";
+    $params[] = $_GET['region'];
+}
+if (!empty($_GET['departamento'])) {
+    $wheres[] = "s.departamento = ?";
+    $params[] = $_GET['departamento'];
+}
+if (!empty($_GET['municipio'])) {
+    $wheres[] = "s.municipio = ?";
+    $params[] = $_GET['municipio'];
+}
+if (!empty($_GET['numero_identificacion_titular'])) {
+    $wheres[] = "s.numero_identificacion_titular = ?";
+    $params[] = $_GET['numero_identificacion_titular'];
+}
 
-  <?php if ($esSub && !empty($row['url_drive'])): ?>
-    <button
-      type="button"
-      class="btn btn-sm btn-info btn-corregir"
-      data-radicado="<?= htmlspecialchars((string)$row['radicado']) ?>"
-      data-path="<?= htmlspecialchars((string)$row['url_drive']) ?>">
-      Corregir
-    </button>
-  <?php else: ?>
-    <?php if (!$rechDep && !$rechPro): ?>
-      <span class="text-muted">—</span>
-    <?php endif; ?>
-  <?php endif; ?>
-</td>
+// --- paginación ---
+$perPage = 1000;
+$page    = max(1, (int)($_GET['page'] ?? 1));
+$offset  = ($page - 1) * $perPage;
 
+// --- Base SQL (para COUNT y para SELECT) ---
+$baseSql = "
+WITH ultimo_evento AS (
+    SELECT 
+        e.id_solicitudes,
+        e.radicado,
+        e.fecha_estado,
+        e.fecha_departamental,
+        ROW_NUMBER() OVER(
+            PARTITION BY e.radicado
+            ORDER BY e.fecha_estado DESC, e.id_solicitudes DESC
+        ) AS rn
+    FROM gestion_terceros.dbo.evento_solicitudes e
+)
+FROM gestion_terceros.dbo.solicitudes s
+JOIN ultimo_evento ue 
+    ON s.radicado = ue.radicado
+WHERE ue.rn = 1
+" . ($wheres ? " AND " . implode(" AND ", $wheres) : "");
 
-          </tr>
-        <?php endwhile; ?>
-        </tbody>
-      </table>
+// --- COUNT total ---
+$sqlCount = "
+;WITH ultimo_evento AS (
+    SELECT 
+        e.id_solicitudes,
+        e.radicado,
+        ROW_NUMBER() OVER(
+            PARTITION BY e.radicado
+            ORDER BY e.fecha_estado DESC, e.id_solicitudes DESC
+        ) AS rn
+    FROM gestion_terceros.dbo.evento_solicitudes e
+)
+SELECT COUNT(1) AS total
+FROM gestion_terceros.dbo.solicitudes s
+JOIN ultimo_evento ue ON s.radicado = ue.radicado
+WHERE ue.rn = 1
+" . ($wheres ? " AND " . implode(" AND ", $wheres) : "");
+
+$stmtCount = sqlsrv_query($conn, $sqlCount, $params);
+
+if ($stmtCount === false) {
+    echo "<div class='alert alert-danger'>Error COUNT: " . htmlspecialchars(print_r(sqlsrv_errors(), true)) . "</div>";
+    $totalRows = 0;
+} else {
+    $rowCount  = sqlsrv_fetch_array($stmtCount, SQLSRV_FETCH_ASSOC);
+    $totalRows = (int)($rowCount['total'] ?? 0);
+}
+
+$totalPages = max(1, (int)ceil($totalRows / $perPage));
+if ($page > $totalPages) $page = $totalPages;
+$offset = ($page - 1) * $perPage; // recalcular
+
+// --- SELECT paginado ---
+$sql = "
+;WITH ultimo_evento AS (
+    SELECT 
+        e.id_solicitudes,
+        e.radicado,
+        e.fecha_estado,
+        e.fecha_departamental,
+        ROW_NUMBER() OVER(
+            PARTITION BY e.radicado
+            ORDER BY e.fecha_estado DESC, e.id_solicitudes DESC
+        ) AS rn
+    FROM gestion_terceros.dbo.evento_solicitudes e
+)
+SELECT 
+    s.radicado,
+    s.rad_via,
+    s.numero_identificacion,
+    s.url_drive,
+    s.apr_departamental,
+    ue.fecha_departamental,
+    s.proceso,
+    ue.fecha_estado,
+    s.region,
+    s.departamento,
+    s.municipio
+FROM gestion_terceros.dbo.solicitudes s
+JOIN ultimo_evento ue ON s.radicado = ue.radicado
+WHERE ue.rn = 1
+" . ($wheres ? " AND " . implode(" AND ", $wheres) : "") . "
+ORDER BY s.rad_via_num, s.rad_via
+OFFSET ? ROWS FETCH NEXT ? ROWS ONLY;
+";
+
+$paramsPage = array_merge($params, [$offset, $perPage]);
+
+$stmt = sqlsrv_query($conn, $sql, $paramsPage);
+
+if ($stmt === false) {
+    echo "<div class='alert alert-danger'>Error de consulta: " . htmlspecialchars(print_r(sqlsrv_errors(), true)) . "</div>";
+} else {
+
+    // ---------- Paginación (ARRIBA) ----------
+    $query = $_GET;
+    unset($query['page']);
+
+    $makeUrl = function($p) use ($query) {
+        $query['page'] = $p;
+        return 'index.php?' . http_build_query($query);
+    };
+
+    $prev  = max(1, $page - 1);
+    $next  = min($totalPages, $page + 1);
+    $start = max(1, $page - 2);
+    $end   = min($totalPages, $page + 2);
+    ?>
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <div class="text-muted small">
+        Mostrando <?= ($totalRows ? min($totalRows, $offset+1) : 0) ?>–<?= ($totalRows ? min($totalRows, $offset+$perPage) : 0) ?>
+        de <?= (int)$totalRows ?> registros
+      </div>
+
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item <?= ($page<=1?'disabled':'') ?>">
+            <a class="page-link" href="<?= htmlspecialchars($makeUrl($prev)) ?>">«</a>
+          </li>
+
+          <?php if ($start > 1): ?>
+            <li class="page-item"><a class="page-link" href="<?= htmlspecialchars($makeUrl(1)) ?>">1</a></li>
+            <?php if ($start > 2): ?><li class="page-item disabled"><span class="page-link">…</span></li><?php endif; ?>
+          <?php endif; ?>
+
+          <?php for ($p=$start; $p<=$end; $p++): ?>
+            <li class="page-item <?= ($p==$page?'active':'') ?>">
+              <a class="page-link" href="<?= htmlspecialchars($makeUrl($p)) ?>"><?= $p ?></a>
+            </li>
+          <?php endfor; ?>
+
+          <?php if ($end < $totalPages): ?>
+            <?php if ($end < $totalPages-1): ?><li class="page-item disabled"><span class="page-link">…</span></li><?php endif; ?>
+            <li class="page-item"><a class="page-link" href="<?= htmlspecialchars($makeUrl($totalPages)) ?>"><?= $totalPages ?></a></li>
+          <?php endif; ?>
+
+          <li class="page-item <?= ($page>=$totalPages?'disabled':'') ?>">
+            <a class="page-link" href="<?= htmlspecialchars($makeUrl($next)) ?>">»</a>
+          </li>
+        </ul>
+      </nav>
     </div>
-  </div>
 
-  <?php } ?>
+    <!-- TABLA (dentro del MISMO else) -->
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>radicado</th>
+              <th>Identificación</th>
+              <th>Región</th>
+              <th>Departamento</th>
+              <th>Municipio</th>
+              <th>Carpeta (url_drive)</th>
+              <th>calificacion departamental</th>
+              <th>fecha de calificacion</th>
+              <th>calificacion nacional</th>
+              <th>fecha de calificacion</th>
+              <th>Observaciones</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+          <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)):
+              $radVia  = $row['rad_via'];
+              $url     = $row['url_drive'];
+
+              $fechaEs = $row['fecha_departamental'];
+              $fechaEsTxt = $fechaEs instanceof DateTime ? $fechaEs->format('Y-m-d') : htmlspecialchars((string)$fechaEs);
+
+              $fechaEs2 = $row['fecha_estado'];
+              $fechaEsTxt2 = $fechaEs2 instanceof DateTime ? $fechaEs2->format('Y-m-d') : htmlspecialchars((string)$fechaEs2);
+          ?>
+            <tr>
+              <td><?= htmlspecialchars((string)$radVia) ?></td>
+              <td><?= htmlspecialchars((string)$row['numero_identificacion']) ?></td>
+              <td><?= htmlspecialchars((string)$row['region']) ?></td>
+              <td><?= htmlspecialchars((string)$row['departamento']) ?></td>
+              <td><?= htmlspecialchars((string)$row['municipio']) ?></td>
+              <td>
+                <?php if (!empty($url)): ?>
+                  <button
+                    class="btn btn-sm btn-outline-primary ver-carpeta"
+                    data-path="<?= htmlspecialchars((string)$url) ?>"
+                    data-rad="<?= htmlspecialchars((string)$radVia) ?>"
+                    type="button">
+                    Abrir
+                  </button>
+                <?php else: ?>
+                  <span class="text-muted">—</span>
+                <?php endif; ?>
+              </td>
+              <td><?= htmlspecialchars((string)$row['apr_departamental']) ?></td>
+              <td><?= $fechaEsTxt ?></td>
+              <td><?= htmlspecialchars((string)$row['proceso']) ?></td>
+              <td><?= $fechaEsTxt2 ?></td>
+              <td>
+                <button
+                  class="btn btn-sm btn-outline-dark ver-observaciones"
+                  data-radicado="<?= htmlspecialchars((string)$row['radicado']) ?>"
+                  type="button">
+                  Ver
+                </button>
+              </td>
+              <td>
+              <?php
+                $rechDep   = strtoupper(trim((string)$row['apr_departamental'])) === 'RECHAZADO';
+                $rechPro   = strtoupper(trim((string)$row['proceso'])) === 'RECHAZADO';
+                $isSubDep  = strtoupper(trim((string)$row['apr_departamental'])) === 'SUBSANACION';
+                $isSubNac  = strtoupper(trim((string)$row['proceso'])) === 'SUBSANACION';
+                $esSub     = $isSubDep || $isSubNac;
+
+                if ($rechDep || $rechPro): ?>
+                  <button type="button" class="btn btn-sm btn-warning btn-objetar me-1"
+                          data-radicado="<?= htmlspecialchars((string)$row['radicado']) ?>">
+                    Objetar
+                  </button>
+                <?php endif; ?>
+
+                <?php if ($esSub && !empty($row['url_drive'])): ?>
+                  <button type="button" class="btn btn-sm btn-info btn-corregir"
+                          data-radicado="<?= htmlspecialchars((string)$row['radicado']) ?>"
+                          data-path="<?= htmlspecialchars((string)$row['url_drive']) ?>">
+                    Corregir
+                  </button>
+                <?php else: ?>
+                  <?php if (!$rechDep && !$rechPro): ?>
+                    <span class="text-muted">—</span>
+                  <?php endif; ?>
+                <?php endif; ?>
+              </td>
+            </tr>
+          <?php endwhile; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+<?php
+} // <-- CIERRE CORRECTO del else de $stmt ok
+?>
+
 
 </div>
 

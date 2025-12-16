@@ -11,13 +11,13 @@ $radicado = trim((string)($_GET['radicado'] ?? ''));
 if ($radicado === '') {
   echo json_encode(['ok'=>false,'msg'=>'Falta radicado']); exit;
 }
-
 $sql = "
 ;WITH E AS (
   SELECT
     id_solicitudes,
     CAST(radicado AS VARCHAR(50)) AS radicado,
     evento,
+    fecha_solicitud,              -- ✅ NUEVO (para marcar ANTIGUO)
     fecha_estado,
     observacion,
     fecha_departamental,
@@ -40,7 +40,6 @@ K AS (
   FROM E
 ),
 N AS (
-  -- 1) Departamental base (solo una vez, evita duplicados del OBJECION)
   SELECT
     'DEPARTAMENTAL' AS tipo,
     e.fecha_departamental AS fecha,
@@ -52,7 +51,6 @@ N AS (
 
   UNION ALL
 
-  -- 2) Objeciones (van en el orden del evento real)
   SELECT
     'OBJECION' AS tipo,
     e.fecha_objecion AS fecha,
@@ -65,7 +63,6 @@ N AS (
 
   UNION ALL
 
-  -- 3) Respuesta a objeción
   SELECT
     'RESPUESTA_OBJECION' AS tipo,
     e.fecha_departamental AS fecha,
@@ -78,11 +75,16 @@ N AS (
 
   UNION ALL
 
-  -- 4) Nacional (calificacion_nacional)
+  -- ✅ 4) Nacional (calificacion_nacional) -> si fecha_solicitud <= 2025-12-17, marcar como ANTIGUO
   SELECT
     'NACIONAL' AS tipo,
     e.fecha_estado AS fecha,
-    e.observacion AS observacion,
+    CASE
+      WHEN e.fecha_solicitud IS NOT NULL
+       AND CAST(e.fecha_solicitud AS date) <= CONVERT(date,'2025-12-17')
+        THEN CONCAT('ANTIGUO: ', e.observacion)
+      ELSE e.observacion
+    END AS observacion,
     CAST(e.id_solicitudes AS float) + 0.40 AS sort_key
   FROM E e
   WHERE e.evento = 'calificacion_nacional'
@@ -91,12 +93,16 @@ N AS (
 
   UNION ALL
 
-  -- 4b) Nacional “Subsanación” que te aparece en creacion_viaticos (qew)
-  --     Lo forzamos a quedar DESPUÉS de respuesta_objecion (si existe)
+  -- ✅ 4b) Nacional “Subsanación” (creacion_viaticos) -> misma regla ANTIGUO
   SELECT
     'NACIONAL' AS tipo,
     e.fecha_estado AS fecha,
-    e.observacion AS observacion,
+    CASE
+      WHEN e.fecha_solicitud IS NOT NULL
+       AND CAST(e.fecha_solicitud AS date) <= CONVERT(date,'2025-12-17')
+        THEN CONCAT('ANTIGUO: ', e.observacion)
+      ELSE e.observacion
+    END AS observacion,
     CAST(ISNULL((SELECT id_resp FROM K), e.id_solicitudes) AS float) + 0.41 AS sort_key
   FROM E e
   CROSS JOIN K
@@ -107,7 +113,6 @@ N AS (
 
   UNION ALL
 
-  -- 5) Corrección (cuando hay subsanación)
   SELECT
     'CORRECCION' AS tipo,
     e.fecha_correccion AS fecha,
@@ -121,6 +126,7 @@ SELECT tipo, fecha, observacion
 FROM N
 ORDER BY sort_key ASC;
 ";
+
 
 $stmt = sqlsrv_query($conn, $sql, [$radicado]);
 if ($stmt === false) {

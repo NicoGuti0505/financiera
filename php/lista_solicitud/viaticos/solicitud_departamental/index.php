@@ -101,12 +101,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 }
 
-// === Leer filtros del POST ===
-$radicado_filtro     = trim($_POST['radicado_filtro'] ?? '');
-$region_filtro       = trim($_POST['region_filtro'] ?? '');
-$departamento_filtro = trim($_POST['departamento_filtro'] ?? '');
-$municipio_filtro    = trim($_POST['municipio_filtro'] ?? '');
-$usuario_filtro      = $_POST['usuario_filtro'] ?? '';
+$radicado_filtro         = trim($_POST['radicado_filtro'] ?? '');
+$identificacion_filtro   = trim($_POST['identificacion_filtro'] ?? '');
+$region_filtro           = trim($_POST['region_filtro'] ?? '');
+$departamento_filtro     = trim($_POST['departamento_filtro'] ?? '');
+$municipio_filtro        = trim($_POST['municipio_filtro'] ?? '');
+$usuario_filtro          = $_POST['usuario_filtro'] ?? '';
+
 
 
 $sql = "SELECT
@@ -162,6 +163,11 @@ if ($municipio_filtro !== '') {
     $sql .= " AND s.municipio = ?";
     $params[] = $municipio_filtro;
 }
+// Filtro por identificación titular - parcial
+if ($identificacion_filtro !== '') {
+    $where .= " AND CAST(s.numero_identificacion_titular AS VARCHAR(50)) LIKE ?";
+    $params[] = "%{$identificacion_filtro}%";
+}
 
 $sql .= " ORDER BY TRY_CAST(s.rad_via AS INT) ASC";
 
@@ -199,6 +205,15 @@ $stmt = sqlsrv_query($conn, $sql, $params);
              id="radicado_filtro"
              value="<?= htmlspecialchars($radicado_filtro ?? '') ?>"
              placeholder="Ej: 12345">
+    </div>
+    <div class="filter-group">
+      <label for="identificacion_filtro">Identificación titular</label>
+      <input type="text"
+            class="filter-input"
+            name="identificacion_filtro"
+            id="identificacion_filtro"
+            value="<?= htmlspecialchars($identificacion_filtro ?? '') ?>"
+            placeholder="Ej: 1234567890">
     </div>
 
     <div class="filter-group">
