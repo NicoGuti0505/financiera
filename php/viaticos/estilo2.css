@@ -1,0 +1,190 @@
+/* Estilos generales */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 0;
+    color: #4a4a4a;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Encabezados */
+h1, .section-title {
+    background: linear-gradient(135deg, #a29bfe, #dfe6e9);
+    color: #ffffff;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 2rem;
+    margin: 0 0 15px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Tablas */
+table {
+    width: 90%;
+    max-width: 1200px;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    background: #f1f2f6;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+th, td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 2px solid #dcdde1;
+}
+
+th {
+    background: linear-gradient(135deg, #a29bfe, #dfe6e9);
+    color: #2d3436;
+    text-align: center;
+    font-weight: bold;
+}
+
+td {
+    background-color: #ffffff;
+    color: #4a4a4a;
+}
+
+table tr:nth-child(even) td {
+    background-color: #f1f2f6;
+}
+
+/* Formulario y Inputs */
+.form-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    padding: 20px;
+    background: #f1f2f6;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 800px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="email"],
+input[type="number"],
+textarea, select {
+    padding: 12px;
+    border: 2px solid #b2bec3;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #a29bfe;
+    outline: none;
+    box-shadow: 0 0 5px rgba(162, 155, 254, 0.5);
+}
+
+input[type="radio"], input[type="checkbox"] {
+    width: auto;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.radio-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Botones */
+button, input[type="submit"] {
+    padding: 14px 22px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #5c53df, #81d1ff);
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background 0.3s, transform 0.2s;
+}
+
+button:hover, input[type="submit"]:hover {
+    background: linear-gradient(135deg, #7a30fa, #a29bfe);
+    transform: scale(1.05);
+}
+
+button.add-row {
+    background: linear-gradient(135deg, #81ecec, #74b9ff);
+}
+
+button.add-row:hover {
+    background: linear-gradient(135deg, #55efc4, #a29bfe);
+}
+
+button.remove-row {
+    background: linear-gradient(135deg, #fab1a0, #ff7675);
+}
+
+button.remove-row:hover {
+    background: linear-gradient(135deg, #ff7675, #d63031);
+}
+
+/* Pie de página */
+.footer {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #a29bfe, #dfe6e9);
+    color: #2d3436;
+    border-radius: 8px;
+    font-size: 16px;
+    margin-top: auto;
+    width: 100%;
+    max-width: 1200px;
+}
+
+#val_rembolso {
+    width: 100%;
+    max-width: 300px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-align: right;
+    padding: 19px;
+    border: 2px solid #b2bec3;
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: #6c5ce7;
+    background-color: #f1f2f6;
+}
+
+.btn-onedrive {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #7a30fa, #a29bfe);
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s, transform 0.2s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    margin-bottom: 20px;
+}
+
+.btn-onedrive:hover {
+    background: linear-gradient(135deg, #b388ff, #a29bfe);
+    transform: scale(1.03);
+}
+

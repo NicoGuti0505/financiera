@@ -1,0 +1,189 @@
+/* Estilos generales */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 0;
+    color: #4e4b4b;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Encabezados */
+h1, .section-title {
+    background: linear-gradient(135deg, #81c784, #d7ccc8);
+    color: #ffffff;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 2rem;
+    margin: 0 0 15px 0;
+    box-shadow: 0 4px 6px rgba(80, 80, 80, 0.3);
+}
+
+/* Tablas */
+table {
+    width: 90%;
+    max-width: 1200px;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    background: #e8f5e9;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(80, 80, 80, 0.2);
+    overflow: hidden;
+}
+
+th, td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 2px solid #c8e6c9;
+}
+
+th {
+    background: linear-gradient(135deg, #81c784, #d7ccc8);
+    color: #3e3e3e;
+    text-align: center;
+    font-weight: bold;
+}
+
+td {
+    background-color: #ffffff;
+    color: #4e4b4b;
+}
+
+table tr:nth-child(even) td {
+    background-color: #f1f8e9;
+}
+
+/* Formulario y Inputs */
+.form-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    padding: 20px;
+    background: #e8f5e9;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(80, 80, 80, 0.2);
+    width: 90%;
+    max-width: 800px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="email"],
+input[type="number"],
+textarea, select {
+    padding: 12px;
+    border: 2px solid #a5d6a7;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #81c784;
+    outline: none;
+    box-shadow: 0 0 5px rgba(129, 199, 132, 0.5);
+}
+
+input[type="radio"], input[type="checkbox"] {
+    width: auto;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.radio-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Botones */
+button, input[type="submit"] {
+    padding: 14px 22px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ff8a65, #ffd180);
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background 0.3s, transform 0.2s;
+}
+
+button:hover, input[type="submit"]:hover {
+    background: linear-gradient(135deg, #ff7043, #ffcc80);
+    transform: scale(1.05);
+}
+
+button.add-row {
+    background: linear-gradient(135deg, #a5d6a7, #c8e6c9);
+}
+
+button.add-row:hover {
+    background: linear-gradient(135deg, #81c784, #dcedc8);
+}
+
+button.remove-row {
+    background: linear-gradient(135deg, #ffab91, #ff8a80);
+}
+
+button.remove-row:hover {
+    background: linear-gradient(135deg, #ff7043, #e57373);
+}
+
+/* Pie de página */
+.footer {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #81c784, #d7ccc8);
+    color: #3e3e3e;
+    border-radius: 8px;
+    font-size: 16px;
+    margin-top: auto;
+    width: 100%;
+    max-width: 1200px;
+}
+
+#val_rembolso {
+    width: 100%;
+    max-width: 300px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-align: right;
+    padding: 19px;
+    border: 2px solid #a5d6a7;
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: #388e3c;
+    background-color: #f1f8e9;
+}
+
+.btn-onedrive {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #ff8a65, #ffd180);
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s, transform 0.2s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    margin-bottom: 20px;
+}
+
+.btn-onedrive:hover {
+    background: linear-gradient(135deg, #ff7043, #ffcc80);
+    transform: scale(1.03);
+}

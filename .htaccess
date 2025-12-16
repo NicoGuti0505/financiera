@@ -1,0 +1,8 @@
+RewriteEngine On
+RewriteRule ^$ /aplicacion/terceros.php [L]
+
+# Permitir acceso
+Options +Indexes +FollowSymLinks +ExecCGI
+Require all granted
+Order allow,deny
+Allow from all

@@ -1,0 +1,9 @@
+/vendor/
+config.php
+
+# opcional pero recomendado
+.env
+*.log
+/php/logs/
+exports/*.csv
+exports/*.txt

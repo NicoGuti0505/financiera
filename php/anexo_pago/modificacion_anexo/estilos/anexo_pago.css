@@ -1,0 +1,81 @@
+/* Estilos para registros existentes */
+.existing-record {
+    background-color: #FFCCCB;
+    border: 1px solid #FF0000;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+/* Estilos para mensajes de error y éxito */
+.error-message {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.success-message {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+/* Estilos para campos de solo lectura */
+.readonly-field {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+/* Estilos para el indicador de carga */
+.loading-indicator {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Estilos para mejorar la legibilidad de los campos de entrada */
+input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Estilos para los botones */
+button {
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+/* Estilos para mejorar la responsividad */
+@media (max-width: 768px) {
+    .flex.space-x-4 {
+        flex-direction: column;
+    }
+
+    .flex.space-x-4 > * {
+        margin-bottom: 10px;
+    }
+}

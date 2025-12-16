@@ -1,0 +1,173 @@
+/* Estilos generales */
+body {
+    background: linear-gradient(to right, #E3F2FD, #CFEBF9);
+    padding: 2rem;
+}
+
+.container {
+    max-width: 1536px; /* max-w-12xl */
+    margin: 0 auto;
+    background-color: rgba(255, 255, 255, 0.623);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Estilos para los headers */
+.headers {
+    display: grid;
+    grid-template-columns: repeat(11, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.2rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #4a5568;
+    text-align: center;
+}
+
+/* Estilos para la cuadrícula de campos */
+.grid-cols-9 {
+    display: grid;
+    grid-template-columns: repeat(11, minmax(0, 1fr));
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Estilos para los campos de entrada */
+input[type="text"], 
+input[type="number"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+input[readonly] {
+    background-color: #f7fafc;
+    cursor: not-allowed;
+}
+
+/* Estilos para los botones */
+button, .btn-back {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover, .btn-back:hover {
+    opacity: 0.9;
+}
+
+.buscarTercero {
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    background-color: #4299e1;
+    color: white;
+}
+
+/* Estilos para los mensajes de error y éxito */
+.error-message {
+    color: #e53e3e;
+    background-color: #fff5f5;
+    border: 1px solid #fc8181;
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.success-message {
+    color: #38a169;
+    background-color: #f0fff4;
+    border: 1px solid #9ae6b4;
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+/* Estilos para el indicador de carga */
+.loading-indicator {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #e2e8f0;
+    border-top: 2px solid #4299e1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 0.5rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Estilos adicionales para mejorar la apariencia */
+#agregarCampos {
+    background-color: #4299e1;
+    color: white;
+}
+
+button[name="guardar_validacion"] {
+    background-color: #48bb78;
+    color: white;
+}
+
+.btn-back {
+    background-color: #a0aec0;
+    color: white;
+    text-decoration: none;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Estilos para mejorar la responsividad */
+@media (max-width: 768px) {
+    .headers,
+    .grid-cols-9 {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions > * {
+        margin-bottom: 0.5rem;
+    }
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+.pagination-link {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    color: #333;
+    text-decoration: none;
+}
+.pagination-link.active {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+}
+.pagination-link:hover {
+    background-color: #ddd;
+}
+

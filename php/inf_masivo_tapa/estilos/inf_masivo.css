@@ -1,0 +1,92 @@
+body {
+    font-family: "Poppins", sans-serif;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to right, #E3F2FD, #CFEBF9);
+    background-size: cover;
+}
+
+.container {
+    max-width: 1536px; /* max-w-12xl */
+    margin: 0 auto;
+    background-color: rgba(255, 255, 255, 0.589);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+
+input[readonly] {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+}
+.form-container {
+    position: relative;
+    padding-right: 40px;
+    margin-bottom: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+.voucher-container.hidden {
+    display: none;
+}
+
+.voucher-container {
+    margin-top: 0.5rem;
+}
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.delete-row {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.form-label {
+    font-size: 0.875rem;
+    color: #4a5568;
+    margin-bottom: 0.25rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.25rem;
+}
+
+.readonly-field {
+    background-color: #f7fafc;
+}
+
+.existing-record {
+    border: 2px solid #ef4444;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+}
+
+/* Estilos para mensajes y alertas */
+.text-red-500 {
+    color: #ef4444;
+}
+
+.text-blue-500 {
+    color: #3b82f6;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}

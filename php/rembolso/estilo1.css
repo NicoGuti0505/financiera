@@ -1,0 +1,157 @@
+/* Estilos generales */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 0;
+    color: #0d47a1;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Encabezados */
+h1, .section-title {
+    background: linear-gradient(135deg, #0d47a1, #1976d2);
+    color: #ffffff;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 2rem;
+    margin: 0 0 15px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Tablas */
+table {
+    width: 90%;
+    max-width: 1200px;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    background: #bbdefb;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+th, td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 2px solid #bbdefb;
+}
+
+th {
+    background: linear-gradient(135deg, #0d47a1, #1976d2);
+    color: #ffffff;
+    text-align: center;
+    font-weight: bold;
+}
+
+td {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+}
+
+table tr:nth-child(even) td {
+    background-color: #bbdefb;
+}
+
+/* Formulario y Inputs */
+.form-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    padding: 20px;
+    background: #bbdefb;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 800px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="email"],
+input[type="number"],
+textarea, select {
+    padding: 12px;
+    border: 2px solid #64b5f6;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #1976d2;
+    outline: none;
+    box-shadow: 0 0 5px rgba(25, 118, 210, 0.5);
+}
+
+input[type="radio"], input[type="checkbox"] {
+    width: auto;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.radio-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Botones */
+button, input[type="submit"] {
+    padding: 14px 22px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #0d47a1, #1976d2);
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background 0.3s, transform 0.2s;
+}
+
+button:hover, input[type="submit"]:hover {
+    background: linear-gradient(135deg, #08306b, #0d47a1);
+    transform: scale(1.05);
+}
+
+button.add-row {
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+}
+
+button.add-row:hover {
+    background: linear-gradient(135deg, #1b5e20, #2e7d32);
+}
+
+button.remove-row {
+    background: linear-gradient(135deg, #b71c1c, #d32f2f);
+}
+
+button.remove-row:hover {
+    background: linear-gradient(135deg, #7f0000, #b71c1c);
+}
+
+/* Pie de página */
+.footer {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #0d47a1, #1976d2);
+    color: white;
+    border-radius: 8px;
+    font-size: 16px;
+    margin-top: auto;
+    width: 100%;
+    max-width: 1200px;
+}
