@@ -121,15 +121,24 @@ $offset = ($page - 1) * $perPage;
 $baseFrom = "
 FROM solicitudes s
 JOIN (
-    SELECT id_usuario, radicado, MIN(fecha_estado) AS primer_evento
-    FROM evento_solicitudes
-    GROUP BY id_usuario, radicado
+    SELECT *
+    FROM (
+        SELECT
+            e.*,
+            ROW_NUMBER() OVER(
+                PARTITION BY e.radicado
+                ORDER BY e.fecha_estado DESC, e.id_solicitudes DESC
+            ) AS rn
+        FROM evento_solicitudes e
+    ) t
+    WHERE t.rn = 1
 ) e ON s.radicado = e.radicado
 WHERE
     s.estado_pago = 'activado'
     AND s.proceso_tercero = 'viaticos'
     AND s.apr_departamental = 'Aprobado'
 ";
+
 
 $where = "";
 $params = [];
