@@ -320,12 +320,12 @@ $stmt = sqlsrv_query($conn, $sql, $paramsData);
   <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)): ?>
     <?php
       $radicado_via = $row['rad_via'] ?? '';
-      $proceso_view = $row['proceso'] ?? null;
+      $proceso_bd   = trim((string)($row['proceso'] ?? ''));
 
       if ($proceso_view === null || $proceso_view === '') {
           $proceso_view = 'Revisión';
       }
-      if (strpos((string)$radicado_via, '.') !== false) {
+      if (($proceso_bd === '' || strcasecmp($proceso_bd, 'Revision') === 0) && strpos((string)$radicado_via, '.') !== false) {
           $proceso_view = 'Legalización';
       }
 
