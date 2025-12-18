@@ -394,7 +394,7 @@ $stmt = sqlsrv_query($conn, $sql, $paramsData);
 <td>
   <button type="button"
           class="btn btn-blue ver-observaciones-btn"
-          data-radicado="<?= htmlspecialchars((string)$row['radicado']) ?>">
+          data-radicado="<?= htmlspecialchars((string)$row['rad_via']) ?>">
     📝 Observación
   </button>
 </td>

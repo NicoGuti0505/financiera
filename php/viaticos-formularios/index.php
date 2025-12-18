@@ -456,7 +456,7 @@ if ($stmt === false) {
               <td>
                 <button
                   class="btn btn-sm btn-outline-dark ver-observaciones"
-                  data-radicado="<?= htmlspecialchars((string)$row['radicado']) ?>"
+                  data-radicado="<?= htmlspecialchars((string)$row['rad_via']) ?>"
                   type="button">
                   Ver
                 </button>
