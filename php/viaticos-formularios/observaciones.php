@@ -105,7 +105,7 @@ SELECT
   END AS observacion,
   CAST(e.id_solicitudes AS float) + 0.41 AS sort_key
 FROM E e
-WHERE e.evento = 'creacion_viaticos'
+WHERE e.evento IN ('creacion_viaticos','actualizacion_viaticos')
   AND e.observacion IS NOT NULL
   AND LTRIM(RTRIM(e.observacion)) <> ''
 
