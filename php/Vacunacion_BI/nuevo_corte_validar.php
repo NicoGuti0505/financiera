@@ -3,8 +3,6 @@ session_start();
 require_once '../../config.php';
 
 header('Content-Type: application/json');
-
-// Evitar timeouts en archivos grandes
 @set_time_limit(0);
 
 set_exception_handler(function ($e) {
@@ -33,6 +31,8 @@ $file = $_FILES['file'];
 $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 $tmpPath = $file['tmp_name'];
 
+$tempTable = '##tmp_nuevo_corte_' . preg_replace('/[^A-Za-z0-9]/', '', session_id());
+
 function extractTxtToTemp($tmpPath, $ext)
 {
     if ($ext === 'txt') {
@@ -40,6 +40,7 @@ function extractTxtToTemp($tmpPath, $ext)
     }
 
     $tempTxt = tempnam(sys_get_temp_dir(), 'txtcut_');
+
     if ($ext === 'zip') {
         $zip = new ZipArchive();
         if ($zip->open($tmpPath) !== true) {
@@ -115,7 +116,7 @@ try {
 $fileObj = new SplFileObject($txtPath, 'r');
 $fileObj->setFlags(SplFileObject::DROP_NEW_LINE);
 
-$expectedHeader = 'Consecutivo|Tipo de Documento|Numero de Documento|Primer Nombre|Primer Apellido|Fecha Nacimiento|Dane Dpto|Dane Municipio|Column 8|FechaUltimaVacuna';
+$expectedHeader = 'Consecutivo|Tipo de Documento|Número de Documento|Primer Nombre|Primer Apellido|Fecha Nacimiento|Dane Dpto|Dane Municipio|Column 8|FechaUltimaVacuna';
 
 $firstLine = $fileObj->fgets();
 if ($firstLine === false) {
@@ -147,20 +148,48 @@ $mapTipo = [
     'PT' => 'Permiso de Protección Temporal',
     'PE' => 'Permiso Especial De Permanencia',
 ];
+sqlsrv_query($conn, "IF OBJECT_ID('tempdb..$tempTable') IS NOT NULL DROP TABLE $tempTable");
+$createSql = "CREATE TABLE $tempTable (
+    TipoDocumento NVARCHAR(100) NOT NULL,
+    NumeroDocumento NVARCHAR(50) NOT NULL,
+    FechaUltimaVacuna NVARCHAR(50) NOT NULL
+)";
+if (sqlsrv_query($conn, $createSql) === false) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'No se pudo crear tabla temporal', 'sqlsrv' => sqlsrv_errors()]);
+    exit;
+}
 
-$maxCorte = 0;
+$paramTipo = null;
+$paramDoc = null;
+$paramFecha = null;
+$insertStmt = sqlsrv_prepare(
+    $conn,
+    "INSERT INTO $tempTable (TipoDocumento, NumeroDocumento, FechaUltimaVacuna) VALUES (?,?,?)",
+    [
+        &$paramTipo,
+        &$paramDoc,
+        &$paramFecha
+    ]
+);
+if ($insertStmt === false) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'No se pudo preparar inserción en tabla temporal', 'sqlsrv' => sqlsrv_errors()]);
+    exit;
+}
+
 $stmtCorte = sqlsrv_query($conn, "SELECT ISNULL(MAX(corte),0) AS max_corte FROM Vacunacion.dbo.VacunacionFiebreAmarilla");
+$maxCorte = 0;
 if ($stmtCorte && ($row = sqlsrv_fetch_array($stmtCorte, SQLSRV_FETCH_ASSOC))) {
     $maxCorte = (int)$row['max_corte'];
 }
-sqlsrv_free_stmt($stmtCorte);
+if ($stmtCorte) {
+    sqlsrv_free_stmt($stmtCorte);
+}
 $nextCorte = $maxCorte + 1;
 
-$nuevos = [];
-$rechazados = [];
 $totalLeidas = 0;
 $sinFecha = 0;
-$conFechaMinisterio = 0;
 
 while (!$fileObj->eof()) {
     $line = $fileObj->fgets();
@@ -174,20 +203,15 @@ while (!$fileObj->eof()) {
     $totalLeidas++;
     $parts = explode('|', $line);
     if (count($parts) < 10) {
-        if (count($rechazados) < 200) {
-            $rechazados[] = ['fila' => $totalLeidas + 1, 'doc' => '', 'motivo' => 'Fila con columnas incompletas'];
-        }
         continue;
     }
+
     $tipoCod = trim($parts[1]);
     $tipo = $mapTipo[$tipoCod] ?? null;
     $doc = trim($parts[2]);
     $fechaVac = trim($parts[9]);
 
-    if ($tipo === '' || $doc === '') {
-        if (count($rechazados) < 200) {
-            $rechazados[] = ['fila' => $totalLeidas + 1, 'doc' => $doc ?: '-', 'motivo' => 'Tipo no valido o documento vacio'];
-        }
+    if (!$tipo || $doc === '') {
         continue;
     }
 
@@ -196,46 +220,58 @@ while (!$fileObj->eof()) {
         continue;
     }
 
-    $stmtExiste = sqlsrv_query($conn, "SELECT FechaAplicacionMinisterio FROM Vacunacion.dbo.VacunacionFiebreAmarilla WITH (NOLOCK) WHERE TipoDocumento = ? AND NumeroDocumento = ?", [$tipo, $doc]);
-    if ($stmtExiste === false) {
+    $paramTipo = $tipo;
+    $paramDoc = $doc;
+    $paramFecha = $fechaVac;
+    $okIns = sqlsrv_execute($insertStmt);
+    if ($okIns === false) {
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error consultando documento', 'sqlsrv' => sqlsrv_errors()]);
+        echo json_encode(['success' => false, 'message' => 'Error insertando en tabla temporal', 'sqlsrv' => sqlsrv_errors()]);
         exit;
     }
-    $existe = sqlsrv_fetch_array($stmtExiste, SQLSRV_FETCH_ASSOC);
-    sqlsrv_free_stmt($stmtExiste);
-    if (!$existe) {
-        if (count($rechazados) < 200) {
-            $rechazados[] = ['fila' => $totalLeidas + 1, 'doc' => $doc, 'motivo' => 'No coincide en la base'];
-        }
-        continue;
-    }
-
-    if (!empty($existe['FechaAplicacionMinisterio'])) {
-        $conFechaMinisterio++;
-        continue;
-    }
-
-    if (count($nuevos) < 200) {
-        $nuevos[] = [
-            'TipoDocumento' => $tipo,
-            'TipoDocumentoCodigo' => $tipoCod,
-            'NumeroDocumento' => $doc,
-            'FechaUltimaVacuna' => $fechaVac
-        ];
-    }
 }
+
+sqlsrv_free_stmt($insertStmt);
+
+$statsSql = "
+SELECT
+    (SELECT COUNT(*) FROM $tempTable) AS total_insertados,
+    (SELECT COUNT(*) FROM $tempTable t WHERE NOT EXISTS (SELECT 1 FROM Vacunacion.dbo.VacunacionFiebreAmarilla v WHERE v.TipoDocumento = t.TipoDocumento AND v.NumeroDocumento = t.NumeroDocumento)) AS no_encontrados,
+    (SELECT COUNT(*) FROM $tempTable t JOIN Vacunacion.dbo.VacunacionFiebreAmarilla v ON v.TipoDocumento = t.TipoDocumento AND v.NumeroDocumento = t.NumeroDocumento WHERE v.FechaAplicacionMinisterio IS NOT NULL) AS con_fecha_min,
+    (SELECT COUNT(*) FROM $tempTable t JOIN Vacunacion.dbo.VacunacionFiebreAmarilla v ON v.TipoDocumento = t.TipoDocumento AND v.NumeroDocumento = t.NumeroDocumento WHERE v.FechaAplicacionMinisterio IS NULL) AS aptos_calc
+";
+
+$totalInsertados = 0;
+$noEncontradosCalc = 0;
+$conFechaMinisterioCalc = 0;
+$aptosCalc = 0;
+$stats = sqlsrv_query($conn, $statsSql);
+if ($stats && ($rowS = sqlsrv_fetch_array($stats, SQLSRV_FETCH_ASSOC))) {
+    $totalInsertados = (int)$rowS['total_insertados'];
+    $noEncontradosCalc = (int)$rowS['no_encontrados'];
+    $conFechaMinisterioCalc = (int)$rowS['con_fecha_min'];
+    $aptosCalc = (int)$rowS['aptos_calc'];
+}
+if ($stats) {
+    sqlsrv_free_stmt($stats);
+}
+
+$_SESSION['nuevo_corte'] = [
+    'corte' => $nextCorte,
+    'temp_table' => $tempTable
+];
 
 echo json_encode([
     'success' => true,
     'message' => 'Validacion de nuevo corte completada',
     'next_corte' => $nextCorte,
     'total_leidas' => $totalLeidas,
-    'nuevos_total' => count($nuevos) >= 200 ? '200+' : count($nuevos),
-    'rechazados_total' => count($rechazados) >= 200 ? '200+' : count($rechazados),
+    'nuevos_total' => $aptosCalc,
+    'rechazados_total' => 0,
     'vacios_total' => $sinFecha,
-    'con_fecha_ministerio_total' => $conFechaMinisterio,
-    'nuevos_preview' => $nuevos,
-    'rechazados_preview' => $rechazados
+    'con_fecha_ministerio_total' => $conFechaMinisterioCalc,
+    'no_encontrados_total' => $noEncontradosCalc,
+    'nuevos_preview' => [],
+    'rechazados_preview' => []
 ]);
 exit;

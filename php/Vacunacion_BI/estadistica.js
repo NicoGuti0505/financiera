@@ -31,6 +31,7 @@ function fetchPowerBIUrl() {
 let selectedFile = null;
 let lastValidation = null;
 let newCutFile = null;
+let newCutAptos = 0;
 const maxFileSize = 10 * 1024 * 1024; // 10 MB
 const newCutMaxSize = 80 * 1024 * 1024; // 80 MB para ZIP/TXT
 const allowedExtensions = [".xlsx", ".xls"];
@@ -148,13 +149,9 @@ function showNewCutSummary(message, isError = false) {
     summary.textContent = message;
 }
 
-function updateNewCutCounts(nuevos, rechazados, conFecha = 0) {
+function updateNewCutCounts(nuevos) {
     const nCount = document.getElementById("newcut-count-nuevos");
-    const rCount = document.getElementById("newcut-count-rechazados");
-    const cfCount = document.getElementById("newcut-count-confecha");
-    if (nCount) nCount.textContent = nuevos;
-    if (rCount) rCount.textContent = rechazados;
-    if (cfCount) cfCount.textContent = conFecha;
+    if (nCount) nCount.textContent = String(nuevos);
 }
 
 async function sendValidation() {
@@ -213,6 +210,7 @@ async function sendValidation() {
 
 async function sendNewCutValidation() {
     const validateBtn = document.getElementById("newcut-validate");
+    const confirmBtn = document.getElementById("newcut-confirm");
     if (!newCutFile || !validateBtn) {
         showNewCutFeedback("Selecciona un archivo TXT antes de validar.", true);
         return;
@@ -244,25 +242,69 @@ async function sendNewCutValidation() {
             throw new Error(msg || "Error al validar nuevo corte.");
         }
 
-        const nuevos = data.nuevos_preview || [];
-        const rechazados = data.rechazados_preview || [];
-        renderTableRows("newcut-table-nuevos", nuevos, ["TipoDocumento", "NumeroDocumento", "FechaUltimaVacuna"], "Sin datos");
-        renderTableRows("newcut-table-rechazados", rechazados, ["doc", "motivo"], "Sin datos");
-        updateNewCutCounts(
-            data.nuevos_total || nuevos.length,
-            data.rechazados_total || rechazados.length,
-            data.con_fecha_ministerio_total || 0
-        );
+        const nuevosTotal = Number(data.nuevos_total) || 0;
+        const rechTotal = Number(data.rechazados_total) || 0;
+        const conFechaTotal = Number(data.con_fecha_ministerio_total) || 0;
+        const sinFechaTotal = Number(data.vacios_total) || 0;
+        const noEncontradosTotal = Number(data.no_encontrados_total) || 0;
+        const leidasTotal = Number(data.total_leidas) || 0;
 
-        const msg = `Validacion nuevo corte completa. Siguiente corte: ${data.next_corte ?? "-"}, leidas: ${data.total_leidas ?? "-"}, nuevos: ${data.nuevos_total ?? nuevos.length}, sin fecha: ${data.vacios_total ?? 0}, con fecha ministerio: ${data.con_fecha_ministerio_total ?? 0}, descartados: ${data.rechazados_total ?? rechazados.length}.`;
+        updateNewCutCounts(nuevosTotal);
+        newCutAptos = nuevosTotal;
+        const card = document.getElementById("newcut-card");
+        if (card) card.classList.remove("hidden");
+
+        const msg = `Validacion nuevo corte completa. Siguiente corte: ${data.next_corte ?? "-"}, leidas: ${leidasTotal}, nuevos: ${nuevosTotal}, sin fecha: ${sinFechaTotal}, con fecha ministerio: ${conFechaTotal}, no encontrados: ${noEncontradosTotal}, rechazados: ${rechTotal}.`;
         showNewCutSummary(msg, false);
         showNewCutFeedback("Archivo listo, revisa los nuevos vacunados.", false);
+        if (confirmBtn) {
+            confirmBtn.classList.remove("hidden");
+            confirmBtn.disabled = !(newCutAptos > 0);
+        }
     } catch (error) {
         console.error(error);
         showNewCutSummary("Error en la validacion de nuevo corte: " + error.message, true);
         showNewCutFeedback("Ocurrio un error al validar.", true);
     } finally {
         validateBtn.disabled = false;
+    }
+}
+
+async function sendNewCutConfirmation() {
+    const confirmBtn = document.getElementById("newcut-confirm");
+    if (!newCutAptos || newCutAptos === 0) {
+        showNewCutSummary("No hay registros validados para actualizar.", true);
+        return;
+    }
+    if (confirmBtn) confirmBtn.disabled = true;
+    showNewCutSummary("Aplicando nuevo corte...", false);
+    try {
+        const response = await fetch("nuevo_corte_confirmar.php", { method: "POST" });
+        const raw = await response.text();
+        let data;
+        try {
+            data = JSON.parse(raw);
+        } catch (err) {
+            throw new Error(raw || "Respuesta no valida del servidor al confirmar nuevo corte.");
+        }
+        if (!response.ok || !data || data.success === false) {
+            const msg = (data && data.message) ? data.message : raw;
+            throw new Error(msg || "Error al confirmar nuevo corte.");
+        }
+        const msg = `Actualizacion nuevo corte aplicada. Corte: ${data.corte ?? "-"}, intentos: ${data.intentos ?? 0}, actualizados: ${data.actualizados ?? 0}.`;
+        showNewCutSummary(msg, false);
+        showNewCutFeedback("Actualizacion ejecutada.", false);
+        updateNewCutCounts(0);
+        newCutAptos = 0;
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.classList.add("hidden");
+        }
+    } catch (error) {
+        console.error(error);
+        showNewCutSummary("Error al confirmar nuevo corte: " + error.message, true);
+    } finally {
+        if (confirmBtn) confirmBtn.disabled = true;
     }
 }
 
@@ -366,6 +408,7 @@ function setupNewCutUpload() {
     const dropZone = document.getElementById("newcut-dropzone");
     const fileInput = document.getElementById("newcut-file");
     const validateBtn = document.getElementById("newcut-validate");
+    const confirmBtn = document.getElementById("newcut-confirm");
 
     if (!dropZone || !fileInput || !validateBtn) {
         return;
@@ -420,6 +463,13 @@ function setupNewCutUpload() {
         e.preventDefault();
         sendNewCutValidation();
     });
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            sendNewCutConfirmation();
+        });
+    }
 }
 
 function initTabs() {

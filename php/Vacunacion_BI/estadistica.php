@@ -242,49 +242,15 @@ $isRoot = isset($_SESSION['tipo_usuario_id']) && $_SESSION['tipo_usuario_id'] ==
 
                     <div id="newcut-summary" class="text-sm text-gray-700 bg-white border border-blue-100 rounded p-3 hidden"></div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div class="bg-white border border-blue-100 rounded-lg p-3">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-semibold text-blue-700">Nuevos vacunados (ministerio)</h3>
-                                <span class="text-xs text-gray-500" id="newcut-count-nuevos">0</span>
-                            </div>
-                            <div class="overflow-auto max-h-80">
-                                <table class="min-w-full text-xs text-left">
-                                    <thead class="bg-blue-50 text-blue-700">
-                                        <tr>
-                                            <th class="px-2 py-1">Tipo</th>
-                                            <th class="px-2 py-1">Documento</th>
-                                            <th class="px-2 py-1">FechaUltimaVacuna</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="newcut-table-nuevos" class="divide-y divide-gray-100">
-                                        <tr><td colspan="3" class="px-2 py-2 text-gray-500 text-center">Sin datos</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div id="newcut-card" class="grid grid-cols-1 gap-2 hidden">
+                        <div class="bg-white border border-green-200 rounded-lg p-6 text-center">
+                            <p class="text-sm text-gray-500">Aptos para actualizar</p>
+                            <p class="text-3xl font-semibold text-green-700" id="newcut-count-nuevos">0</p>
                         </div>
-
-                        <div class="bg-white border border-red-100 rounded-lg p-3">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-semibold text-red-700">Registros existentes/invalidos</h3>
-                                <div class="flex flex-col text-right">
-                                    <span class="text-xs text-gray-500" id="newcut-count-rechazados">0</span>
-                                    <span class="text-xs text-gray-500">Con Fecha Ministerio: <span id="newcut-count-confecha">0</span></span>
-                                </div>
-                            </div>
-                            <div class="overflow-auto max-h-80">
-                                <table class="min-w-full text-xs text-left">
-                                    <thead class="bg-red-50 text-red-700">
-                                        <tr>
-                                            <th class="px-2 py-1">Documento</th>
-                                            <th class="px-2 py-1">Motivo</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="newcut-table-rechazados" class="divide-y divide-gray-100">
-                                        <tr><td colspan="2" class="px-2 py-2 text-gray-500 text-center">Sin datos</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="flex justify-center">
+                            <button id="newcut-confirm" class="bg-green-600 text-white px-6 py-3 rounded disabled:opacity-50 disabled:cursor-not-allowed hidden" disabled>
+                                Confirmar nuevo corte
+                            </button>
                         </div>
                     </div>
 
